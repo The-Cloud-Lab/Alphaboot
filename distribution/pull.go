@@ -3,7 +3,8 @@ package distribution // import "github.com/docker/docker/distribution"
 import (
 	"context"
 	"fmt"
-
+	"os"
+	"os/exec"
 	"github.com/containerd/log"
 	"github.com/distribution/reference"
 	"github.com/docker/docker/api"
@@ -17,17 +18,42 @@ import (
 // Pull initiates a pull operation. image is the repository name to pull, and
 // tag may be either empty, or indicate a specific tag to pull.
 func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, local ContentStore) error {
-	repoInfo, err := pullEndpoints(ctx, config.RegistryService, ref, func(ctx context.Context, repoInfo registry.RepositoryInfo, endpoint registry.APIEndpoint) error {
-		log.G(ctx).Debugf("Trying to pull %s from %s", reference.FamiliarName(repoInfo.Name), endpoint.URL)
-		puller := newPuller(endpoint, &repoInfo, config, local)
-		return puller.pull(ctx, ref)
-	})
+	imagePath := fmt.Sprintf("cache/%s.tar.gz", reference.FamiliarName(ref))
 
-	if err == nil {
-		config.ImageEventLogger(reference.FamiliarString(ref), reference.FamiliarName(repoInfo.Name), events.ActionPull)
-	}
+    if _, err := os.Stat(imagePath); err == nil {
+        fmt.Println("Image present in cache")
 
-	return err
+        // Load the Docker image from the .tar.gz file
+        cmd := exec.Command("docker", "load", "-i", imagePath)
+        if err := cmd.Run(); err != nil {
+            return fmt.Errorf("failed to load Docker image: %w", err)
+        }
+
+        return nil
+    } else if os.IsNotExist(err) {
+        fmt.Println("Image not present in cache")
+    } else {
+        // Something went wrong while trying to read file
+        return err
+    }
+
+    repoInfo, err := pullEndpoints(ctx, config.RegistryService, ref, func(ctx context.Context, repoInfo registry.RepositoryInfo, endpoint registry.APIEndpoint) error {
+        log.G(ctx).Debugf("Trying to pull %s from %s", reference.FamiliarName(repoInfo.Name), endpoint.URL)
+        puller := newPuller(endpoint, &repoInfo, config, local)
+        return puller.pull(ctx, ref)
+    })
+
+    if err == nil {
+        config.ImageEventLogger(reference.FamiliarString(ref), reference.FamiliarName(repoInfo.Name), events.ActionPull)
+		// Save the Docker image to a .tar.gz file
+        cmd := exec.Command("docker", "save", reference.FamiliarName(ref))
+        cmd.Stdout, _ = os.Create(imagePath)
+        if err := cmd.Run(); err != nil {
+            return fmt.Errorf("failed to save Docker image: %w", err)
+        }
+    }
+
+    return err
 }
 
 // Tags returns available tags for the given image in the remote repository.
