@@ -18,8 +18,17 @@ import (
 // Pull initiates a pull operation. image is the repository name to pull, and
 // tag may be either empty, or indicate a specific tag to pull.
 func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, local ContentStore) error {
-	imagePath := fmt.Sprintf("cache/%s.tar.gz", reference.FamiliarName(ref))
+	// Check if the alphabootcache directory exists
+    _, err := os.Stat("alphabootcache")
+    if os.IsNotExist(err) {
+        // If not, create it
+        errDir := os.MkdirAll("alphabootcache", 0755)
+        if errDir != nil {
+            return err
+        }
+    }
 
+    imagePath := fmt.Sprintf("alphabootcache/%s.tar.gz", reference.FamiliarName(ref))
     if _, err := os.Stat(imagePath); err == nil {
         fmt.Println("Image present in cache")
 
