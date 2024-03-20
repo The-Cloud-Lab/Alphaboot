@@ -13,6 +13,7 @@ import (
 	"github.com/docker/docker/registry"
 	"github.com/opencontainers/go-digest"
 	"github.com/pkg/errors"
+	"strings"
 )
 
 // Pull initiates a pull operation. image is the repository name to pull, and
@@ -52,15 +53,41 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
         return puller.pull(ctx, ref)
     })
 
-    if err == nil {
-        config.ImageEventLogger(reference.FamiliarString(ref), reference.FamiliarName(repoInfo.Name), events.ActionPull)
+	if err == nil {
+		config.ImageEventLogger(reference.FamiliarString(ref), reference.FamiliarName(repoInfo.Name), events.ActionPull)
 		// Save the Docker image to a .tar.gz file
-        cmd := exec.Command("docker", "save", reference.FamiliarName(ref))
-        cmd.Stdout, _ = os.Create(imagePath)
-        if err := cmd.Run(); err != nil {
-            return fmt.Errorf("failed to save Docker image: %w", err)
-        }
-    }
+		cmd := exec.Command("docker", "save", reference.FamiliarName(ref))
+		cmd.Stdout, _ = os.Create(imagePath)
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("failed to save Docker image: %w", err)
+		}
+
+		// Check if the image name contains a slash
+		if strings.Contains(reference.FamiliarName(ref), "/") {
+			parts := strings.SplitN(reference.FamiliarName(ref), "/", 2)
+			dirname := parts[0]
+			imgname := parts[1]
+
+			// Check if the dirname directory exists inside alphabootcache
+			dirPath := fmt.Sprintf("alphabootcache/%s", dirname)
+			_, err := os.Stat(dirPath)
+			if os.IsNotExist(err) {
+				// If not, create it
+				errDir := os.MkdirAll(dirPath, 0755)
+				if errDir != nil {
+					return errDir
+				}
+			}
+
+			// Save the imgname as a .tar.gz file
+			imgPath := fmt.Sprintf("%s/%s.tar.gz", dirPath, imgname)
+			cmd := exec.Command("docker", "save", reference.FamiliarName(ref))
+			cmd.Stdout, _ = os.Create(imgPath)
+			if err := cmd.Run(); err != nil {
+				return fmt.Errorf("failed to save Docker image: %w", err)
+			}
+		}
+	}
 
     return err
 }
