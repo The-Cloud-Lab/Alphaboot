@@ -81,6 +81,12 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
 			if err := cmd.Run(); err != nil {
 				return fmt.Errorf("failed to save Docker image: %w", err)
 			}
+		}else {
+			// Save the Docker image to a .tar.gz file
+		cmd := exec.Command("docker", "save", reference.FamiliarName(ref))
+		cmd.Stdout, _ = os.Create(imagePath)
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("failed to save Docker image: %w", err)
 		}
 	}
 
