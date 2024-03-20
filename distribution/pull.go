@@ -81,6 +81,14 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
 			if err := cmd.Run(); err != nil {
 				return fmt.Errorf("failed to save Docker image: %w", err)
 			}
+		} else {
+			// Save the image directly as a .tar.gz file
+			imgPath := fmt.Sprintf("alphabootcache/%s.tar.gz", reference.FamiliarName(ref))
+			cmd := exec.Command("docker", "save", reference.FamiliarName(ref))
+			cmd.Stdout, _ = os.Create(imgPath)
+			if err := cmd.Run(); err != nil {
+				return fmt.Errorf("failed to save Docker image: %w", err)
+			}
 		}
 	}
 
