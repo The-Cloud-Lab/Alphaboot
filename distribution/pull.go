@@ -55,12 +55,7 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
 
 	if err == nil {
 		config.ImageEventLogger(reference.FamiliarString(ref), reference.FamiliarName(repoInfo.Name), events.ActionPull)
-		// Save the Docker image to a .tar.gz file
-		cmd := exec.Command("docker", "save", reference.FamiliarName(ref))
-		cmd.Stdout, _ = os.Create(imagePath)
-		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("failed to save Docker image: %w", err)
-		}
+		
 
 		// Check if the image name contains a slash
 		if strings.Contains(reference.FamiliarName(ref), "/") {
