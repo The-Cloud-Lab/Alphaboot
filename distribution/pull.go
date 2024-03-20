@@ -29,23 +29,33 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
         }
     }
 
-    imagePath := fmt.Sprintf("alphabootcache/%s.tar.gz", reference.FamiliarName(ref))
-    if _, err := os.Stat(imagePath); err == nil {
-        fmt.Println("Image present in cache")
+	imagePath := ""
+	imageName := reference.FamiliarName(ref)
+	if strings.Contains(imageName, "/") {
+		parts := strings.SplitN(imageName, "/", 2)
+		dirname := parts[0]
+		imgname := parts[1]
+		imagePath = fmt.Sprintf("alphabootcache/%s/%s.tar.gz", dirname, imgname)
+	} else {
+		imagePath = fmt.Sprintf("alphabootcache/%s.tar.gz", imageName)
+	}
 
-        // Load the Docker image from the .tar.gz file
-        cmd := exec.Command("docker", "load", "-i", imagePath)
-        if err := cmd.Run(); err != nil {
-            return fmt.Errorf("failed to load Docker image: %w", err)
-        }
+	if _, err := os.Stat(imagePath); err == nil {
+		fmt.Println("Image present in cache")
 
-        return nil
-    } else if os.IsNotExist(err) {
-        fmt.Println("Image not present in cache")
-    } else {
-        // Something went wrong while trying to read file
-        return err
-    }
+		// Load the Docker image from the .tar.gz file
+		cmd := exec.Command("docker", "load", "-i", imagePath)
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("failed to load Docker image: %w", err)
+		}
+
+		return nil
+	} else if os.IsNotExist(err) {
+		fmt.Println("Image not present in cache")
+	} else {
+		// Something went wrong while trying to read file
+		return err
+	}
 
     repoInfo, err := pullEndpoints(ctx, config.RegistryService, ref, func(ctx context.Context, repoInfo registry.RepositoryInfo, endpoint registry.APIEndpoint) error {
         log.G(ctx).Debugf("Trying to pull %s from %s", reference.FamiliarName(repoInfo.Name), endpoint.URL)
