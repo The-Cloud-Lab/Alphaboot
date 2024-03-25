@@ -14,12 +14,14 @@ import (
 	"github.com/opencontainers/go-digest"
 	"github.com/pkg/errors"
 	"strings"
+	"log"
 )
 
 // Pull initiates a pull operation. image is the repository name to pull, and
 // tag may be either empty, or indicate a specific tag to pull.
 func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, local ContentStore) error {
 	// Check if the alphabootcache directory exists
+	log.Println("Pulling image")
     _, err := os.Stat("alphabootcache")
     if os.IsNotExist(err) {
         // If not, create it
