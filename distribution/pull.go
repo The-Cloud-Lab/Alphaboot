@@ -41,13 +41,13 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
 	}
 
 	if _, err := os.Stat(imagePath); err == nil {
-		fmt.Println("Image present in cache")
+		log.Println("Image present in cache")
 
 		// Load the Docker image from the .tar.gz file
 		cmd := exec.Command("docker", "load", "-i", imagePath)
-		fmt.Println(imagePath)
+		log.Println(imagePath)
 		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("failed to load Docker image: %w", err)
+			return log.Errorf("failed to load Docker image: %w", err)
 		}
 
 		return nil
