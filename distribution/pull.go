@@ -20,6 +20,7 @@ import (
 // tag may be either empty, or indicate a specific tag to pull.
 func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, local ContentStore) error {
 	// Check if the alphabootcache directory exists
+	fmt.Println("Checking if alphabootcache directory exists")
     _, err := os.Stat("alphabootcache")
     if os.IsNotExist(err) {
         // If not, create it
@@ -41,13 +42,13 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
 	}
 
 	if _, err := os.Stat(imagePath); err == nil {
-		log.Println("Image present in cache")
+		fmt.Println("Image present in cache")
 
 		// Load the Docker image from the .tar.gz file
 		cmd := exec.Command("docker", "load", "-i", imagePath)
-		log.Println(imagePath)
+		fmt.Println(imagePath)
 		if err := cmd.Run(); err != nil {
-			return log.Errorf("failed to load Docker image: %w", err)
+			return fmt.Errorf("failed to load Docker image: %w", err)
 		}
 
 		return nil
