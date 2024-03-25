@@ -20,7 +20,6 @@ import (
 // tag may be either empty, or indicate a specific tag to pull.
 func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, local ContentStore) error {
 	// Check if the alphabootcache directory exists
-	fm
     _, err := os.Stat("alphabootcache")
     if os.IsNotExist(err) {
         // If not, create it
