@@ -20,7 +20,7 @@ import (
 // tag may be either empty, or indicate a specific tag to pull.
 func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, local ContentStore) error {
 	// Check if the alphabootcache directory exists
-	log.G("Checking if alphabootcache directory exists")
+	fm
     _, err := os.Stat("alphabootcache")
     if os.IsNotExist(err) {
         // If not, create it
@@ -52,9 +52,12 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
 		}
 
 		return nil
+	} else if os.IsNotExist(err) {
+		fmt.Println("Image not present in cache")
 	} else {
 		// Something went wrong while trying to read file
-		
+		return err
+	}
 
     repoInfo, err := pullEndpoints(ctx, config.RegistryService, ref, func(ctx context.Context, repoInfo registry.RepositoryInfo, endpoint registry.APIEndpoint) error {
         log.G(ctx).Debugf("Trying to pull %s from %s", reference.FamiliarName(repoInfo.Name), endpoint.URL)
@@ -102,7 +105,6 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
 	}
 
     return err
-	}
 }
 
 // Tags returns available tags for the given image in the remote repository.
