@@ -45,6 +45,7 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
 
 		// Load the Docker image from the .tar.gz file
 		cmd := exec.Command("docker", "load", "-i", imagePath)
+		fmt.Println(imagePath)
 		if err := cmd.Run(); err != nil {
 			return fmt.Errorf("failed to load Docker image: %w", err)
 		}
