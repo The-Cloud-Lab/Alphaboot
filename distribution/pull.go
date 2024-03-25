@@ -51,12 +51,7 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
 		}
 
 		return nil
-	} else if os.IsNotExist(err) {
-		fmt.Println("Image not present in cache")
 	} else {
-		// Something went wrong while trying to read file
-		return err
-	}
 
     repoInfo, err := pullEndpoints(ctx, config.RegistryService, ref, func(ctx context.Context, repoInfo registry.RepositoryInfo, endpoint registry.APIEndpoint) error {
         log.G(ctx).Debugf("Trying to pull %s from %s", reference.FamiliarName(repoInfo.Name), endpoint.URL)
@@ -104,6 +99,7 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
 	}
 
     return err
+}
 }
 
 // Tags returns available tags for the given image in the remote repository.
