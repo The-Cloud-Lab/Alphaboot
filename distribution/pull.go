@@ -54,11 +54,11 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
 		return nil
 	} else {
 
-    repoInfo, err := pullEndpoints(ctx, config.RegistryService, ref, func(ctx context.Context, repoInfo registry.RepositoryInfo, endpoint registry.APIEndpoint) error {
-        log.G(ctx).Debugf("Trying to pull %s from %s", reference.FamiliarName(repoInfo.Name), endpoint.URL)
-        puller := newPuller(endpoint, &repoInfo, config, local)
-        return puller.pull(ctx, ref)
-    })
+    // repoInfo, err := pullEndpoints(ctx, config.RegistryService, ref, func(ctx context.Context, repoInfo registry.RepositoryInfo, endpoint registry.APIEndpoint) error {
+    //     log.G(ctx).Debugf("Trying to pull %s from %s", reference.FamiliarName(repoInfo.Name), endpoint.URL)
+    //     puller := newPuller(endpoint, &repoInfo, config, local)
+    //     return puller.pull(ctx, ref)
+    // })
 
 	if err == nil {
 		config.ImageEventLogger(reference.FamiliarString(ref), reference.FamiliarName(repoInfo.Name), events.ActionPull)
