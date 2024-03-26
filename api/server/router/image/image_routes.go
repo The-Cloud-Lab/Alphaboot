@@ -34,6 +34,7 @@ import (
 
 // Creates an image from Pull or from Import
 func (ir *imageRouter) postImagesCreate(ctx context.Context, w http.ResponseWriter, r *http.Request, vars map[string]string) error {
+	fmt.Println("postImagesCreate function has been executed") // Print statement added
 	if err := httputils.ParseForm(r); err != nil {
 		return err
 	}
