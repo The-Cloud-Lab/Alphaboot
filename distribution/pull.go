@@ -41,7 +41,6 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
 		imagePath = fmt.Sprintf("alphabootcache/%s.tar.gz", imageName)
 	}
 
-	if _, err := os.Stat(imagePath); err == nil {
 		fmt.Println("Image present in cache")
 
 		// Load the Docker image from the .tar.gz file
@@ -52,6 +51,8 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
 		}
 
 		return nil
+
+}
 // 	} else {
 
 //     repoInfo, err := pullEndpoints(ctx, config.RegistryService, ref, func(ctx context.Context, repoInfo registry.RepositoryInfo, endpoint registry.APIEndpoint) error {
@@ -100,9 +101,9 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
 // 	}
 
 //     return err
- }
- return nil
-}
+
+
+
 
 // Tags returns available tags for the given image in the remote repository.
 func Tags(ctx context.Context, ref reference.Named, config *Config) ([]string, error) {
