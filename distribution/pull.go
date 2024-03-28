@@ -33,9 +33,9 @@ func Pull(ctx context.Context, ref reference.Named, config *ImagePullConfig, loc
 	imagePath := ""
 	imageName := reference.FamiliarName(ref)
 	if strings.Contains(imageName, "/") {
-		parts := strings.SplitN(imageName, "/", 2)
-		dirname := parts[0]
-		imgname := parts[1]
+		lastSlashIndex := strings.LastIndex(imageName, "/")
+		dirname := imageName[:lastSlashIndex]
+		imgname := imageName[lastSlashIndex+1:]
 		imagePath = fmt.Sprintf("alphabootcache/%s/%s.tar.gz", dirname, imgname)
 	} else {
 		imagePath = fmt.Sprintf("alphabootcache/%s.tar.gz", imageName)
