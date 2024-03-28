@@ -8,7 +8,7 @@ import (
 	"github.com/containerd/log"
 	"github.com/distribution/reference"
 	"github.com/docker/docker/api"
-	// "github.com/docker/docker/api/types/events"
+	"github.com/docker/docker/api/types/events"
 	refstore "github.com/docker/docker/reference"
 	"github.com/docker/docker/registry"
 	"github.com/opencontainers/go-digest"
